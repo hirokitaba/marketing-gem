@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>第14回マーケティング研究会｜AIワークシート</title>
+<style>
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Hiragino Sans', 'Noto Sans JP', sans-serif; background: #f5f5f0; color: #1a1a1a; min-height: 100vh; }
+.page-header { background: #0F6E56; color: #E1F5EE; padding: 1rem 1.5rem; }
+.page-header-inner { max-width: 720px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; }
+.page-logo { font-size: 11px; opacity: 0.8; }
+.page-title { font-size: 16px; font-weight: 500; margin-top: 2px; }
+.page-sub { font-size: 12px; opacity: 0.75; margin-top: 2px; }
+.container { max-width: 720px; margin: 0 auto; padding: 1.5rem 1rem 4rem; }
+.company-panel { background: #fff; border: 0.5px solid #ddd; border-radius: 12px; padding: 1rem 1.25rem; margin-bottom: 1.25rem; }
+.company-panel-header { display: flex; justify-content: space-between; align-items: center; cursor: pointer; }
+.company-panel-title { font-size: 14px; font-weight: 500; }
+.company-tag { font-size: 11px; background: #E1F5EE; color: #0F6E56; padding: 2px 8px; border-radius: 4px; margin-left: 8px; }
+.toggle-arrow { font-size: 12px; color: #888; }
+.company-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.company-fields-full { grid-column: 1 / -1; }
+.field-label { font-size: 11px; color: #666; margin-bottom: 4px; }
+input, textarea, select { width: 100%; font-size: 13px; padding: 8px 10px; border: 1px solid #ddd; border-radius: 8px; background: #fafafa; color: #1a1a1a; font-family: inherit; resize: vertical; outline: none; }
+input:focus, textarea:focus { border-color: #1D9E75; background: #fff; }
+textarea { min-height: 70px; line-height: 1.6; }
+.step-nav { display: flex; gap: 6px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+.step-btn { font-size: 12px; padding: 6px 12px; border: 1px solid #ddd; border-radius: 20px; cursor: pointer; background: #fff; color: #666; font-family: inherit; transition: all 0.15s; }
+.step-btn:hover { border-color: #1D9E75; color: #0F6E56; }
+.step-btn.active { background: #0F6E56; color: #E1F5EE; border-color: #0F6E56; }
+.step-btn.done { border-color: #5DCAA5; color: #0F6E56; background: #f0fdf8; }
+.step-card { background: #fff; border: 0.5px solid #ddd; border-radius: 12px; overflow: hidden; }
+.step-card-head { padding: 1rem 1.25rem; border-bottom: 0.5px solid #eee; background: #fafafa; display: flex; align-items: flex-start; gap: 10px; }
+.step-num { width: 26px; height: 26px; border-radius: 50%; background: #1D9E75; color: #fff; font-size: 12px; font-weight: 500; display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+.step-name { font-size: 14px; font-weight: 500; }
+.step-desc { font-size: 12px; color: #888; margin-top: 2px; line-height: 1.5; }
+.step-body { padding: 1rem 1.25rem; }
+.prompt-hint { font-size: 12px; color: #666; background: #f5fdf9; border-left: 3px solid #5DCAA5; border-radius: 4px; padding: 8px 12px; margin-bottom: 12px; line-height: 1.7; }
+.prompt-hint strong { color: #0F6E56; }
+.free-q { margin-bottom: 12px; }
+.gen-btn { display: flex; align-items: center; gap: 6px; background: #0F6E56; color: #fff; border: none; border-radius: 8px; padding: 10px 18px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; transition: opacity 0.15s; }
+.gen-btn:hover { opacity: 0.88; }
+.gen-btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.loading-wrap { margin: 10px 0; }
+.loading-bar { height: 3px; background: linear-gradient(90deg, #1D9E75, #5DCAA5, #1D9E75); background-size: 200%; animation: shimmer 1.4s infinite; border-radius: 2px; }
+@keyframes shimmer { 0%{background-position:-200% 0} 100%{background-position:200% 0} }
+.loading-text { font-size: 12px; color: #888; margin-top: 6px; }
+.divider { height: 0.5px; background: #eee; margin: 14px 0; }
+.result-box { background: #fafdf9; border: 1px solid #c9edd8; border-radius: 8px; padding: 14px; font-size: 13px; color: #1a1a1a; line-height: 1.85; white-space: pre-wrap; word-break: break-word; }
+.result-label { font-size: 11px; font-weight: 500; color: #0F6E56; margin-bottom: 8px; }
+.copy-btn { margin-top: 8px; font-size: 11px; color: #888; background: #fff; border: 1px solid #ddd; border-radius: 6px; padding: 5px 12px; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+.copy-btn:hover { border-color: #1D9E75; color: #0F6E56; }
+.nav-row { display: flex; justify-content: space-between; align-items: center; margin-top: 16px; }
+.nav-arrow { font-size: 12px; color: #666; background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 7px 14px; cursor: pointer; font-family: inherit; transition: all 0.15s; }
+.nav-arrow:hover { border-color: #1D9E75; color: #0F6E56; }
+.complete-msg { font-size: 13px; color: #0F6E56; font-weight: 500; }
+.api-notice { background: #FAEEDA; border: 1px solid #EF9F27; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #633806; margin-bottom: 14px; line-height: 1.7; display: none; }
+@media (max-width: 540px) {
+  .company-fields { grid-template-columns: 1fr; }
+  .company-fields-full { grid-column: 1; }
+}
+</style>
+</head>
+<body>
+
+<div class="page-header">
+  <div class="page-header-inner">
+    <div>
+      <div class="page-logo">大阪府中小企業家同友会 経営労働部｜マーケティング研究会</div>
+      <div class="page-title">第14回 AIワークシート｜マーケ活動・計画づくり</div>
+      <div class="page-sub">CooKai株式会社 北林弘行 / 2026.3.18</div>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+
+  <div class="api-notice" id="apiNotice">
+    ⚠️ APIキーが設定されていません。下記のコード内 <code>YOUR_API_KEY</code> を実際のキーに置き換えてください。
+  </div>
+
+  <!-- 会社情報 -->
+  <div class="company-panel" id="companyPanel">
+    <div class="company-panel-header" onclick="toggleCompany()">
+      <div style="display:flex;align-items:center;">
+        <span class="company-panel-title">Step 0｜自社情報を入力する</span>
+        <span class="company-tag" id="companyTag">未入力</span>
+      </div>
+      <span class="toggle-arrow" id="toggleArrow">▼ 開く</span>
+    </div>
+    <div id="companyFields" style="display:none;">
+      <div class="company-fields">
+        <div>
+          <div class="field-label">会社名 *</div>
+          <input id="companyName" placeholder="株式会社○○" oninput="updateTag()">
+        </div>
+        <div>
+          <div class="field-label">業種・業態</div>
+          <input id="industry" placeholder="例：建設業・塗装工事">
+        </div>
+        <div>
+          <div class="field-label">所在地</div>
+          <input id="location" placeholder="例：大阪市中央区">
+        </div>
+        <div>
+          <div class="field-label">従業員数・規模</div>
+          <input id="size" placeholder="例：15名・年商3億円">
+        </div>
+        <div>
+          <div class="field-label">URL</div>
+          <input id="website" placeholder="https://example.com">
+        </div>
+        <div>
+          <div class="field-label">主な顧客層</div>
+          <input id="customers" placeholder="例：一般消費者 / 法人BtoB">
+        </div>
+        <div class="company-fields-full">
+          <div class="field-label">事業内容・主要商品・サービス *</div>
+          <textarea id="bizDetail" placeholder="どんな商品・サービスを、誰に、どのように提供していますか？"></textarea>
+        </div>
+        <div class="company-fields-full">
+          <div class="field-label">現在のマーケティング上の悩み</div>
+          <textarea id="challenge" placeholder="例：場当たり的な営業が多い、新規集客の方法がわからない…" style="min-height:55px;"></textarea>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ステップナビ -->
+  <div class="step-nav" id="stepNav"></div>
+
+  <!-- ステップコンテンツ -->
+  <div id="stepContent"></div>
+
+</div>
+
+<script>
+const API_KEY = 'YOUR_API_KEY';
+
+const STEPS = [
+  {
+    num: 1,
+    name: '3Cの整理｜自社・顧客・競合',
+    desc: '市場における自社の立ち位置を言語化する',
+    hint: '入力した会社情報をもとに、<strong>3C分析の骨格</strong>を生成します。自社の強み・弱み、想定顧客像、競合との差異を整理します。',
+    promptLabel: '特に掘り下げたい点があれば（任意）',
+    promptPlaceholder: '例：競合と差別化できている点を強調してほしい',
+    buildPrompt: (c, extra) => `あなたは中小企業のマーケティング支援の専門家です。以下の会社情報をもとに、マーケティング研究会のワークシートとして使える3C分析を日本語で作成してください。
+
+【会社情報】
+会社名：${c.name} / 業種：${c.industry} / 所在地：${c.location} / 規模：${c.size}
+事業内容：${c.biz}
+主な顧客：${c.customers}
+現在の課題：${c.challenge}
+${extra ? `追加の視点：${extra}` : ''}
+
+【出力形式】
+■ 自社（Company）
+・強み（3〜4点）
+・弱み・課題（2〜3点）
+
+■ 顧客（Customer）
+・主要ターゲット層のプロフィール
+・顧客が求めていること（ニーズ・インサイト）
+
+■ 競合（Competitor）
+・想定される競合の特徴
+・自社が勝てるポイント・差別化余地
+
+最後に「この3Cから見えるマーケ上の重要課題」を1〜2行で述べてください。`
+  },
+  {
+    num: 2,
+    name: 'マーケ基本戦略｜4P×リソース確認',
+    desc: '商品・価格・流通・プロモーションと自社リソースを対応させる',
+    hint: '自社の「人・モノ・カネ・情報」リソースに応じた<strong>現実的な4P戦略案</strong>を生成します。無理なく実行できる打ち手を優先します。',
+    promptLabel: '特に強化したい領域（任意）',
+    promptPlaceholder: '例：プロモーション、価格戦略、チャネル拡大など',
+    buildPrompt: (c, extra) => `中小企業のマーケティング実践支援の専門家として、以下の会社情報をもとに4P戦略の整理と、リソース（人・モノ・カネ・情報）との対応表を日本語で作成してください。
+
+【会社情報】
+${c.name} / ${c.industry} / ${c.location} / 規模：${c.size}
+事業：${c.biz} / 顧客：${c.customers} / 課題：${c.challenge}
+${extra ? `強化したい領域：${extra}` : ''}
+
+【出力形式】
+■ Product（商品・サービス）
+・現状の強みと改善余地
+
+■ Price（価格戦略）
+・推奨価格ポジションと根拠
+
+■ Place（流通・チャネル）
+・現状チャネルと追加すべきチャネル候補
+
+■ Promotion（プロモーション）
+・リソースを考慮した優先施策（3点、実行しやすい順）
+
+■ リソース確認
+人・モノ・カネ・情報それぞれに「使えるもの」「不足しているもの」を簡潔に記載`
+  },
+  {
+    num: 3,
+    name: 'ビジョン逆算｜中長期マーケ計画',
+    desc: '3〜5年後のゴールから今年やるべきことを逆算する',
+    hint: 'ビジョン・目標から逆算した<strong>年間マーケティング計画の骨格</strong>を生成します。「何を、いつ、誰に」を時系列で整理します。',
+    promptLabel: '3〜5年後に実現したい姿（できれば入力）',
+    promptPlaceholder: '例：地域No.1になる、法人顧客を20社確保するなど',
+    buildPrompt: (c, extra) => `中小企業の経営支援専門家として、以下の会社情報とビジョンをもとに、マーケティング年間計画の骨格を作成してください。
+
+【会社情報】
+${c.name} / ${c.industry} / ${c.location} / 規模：${c.size}
+事業：${c.biz} / 顧客：${c.customers} / 課題：${c.challenge}
+${extra ? `目指す姿：${extra}` : ''}
+
+【出力形式】
+■ 中長期目標（3〜5年）
+目標と主要KPI（売上・顧客数・認知度など）
+
+■ 今年度の重点テーマ（3つ以内）
+
+■ 年間アクションプラン（月次イメージ）
+Q1・Q2・Q3・Q4 それぞれの主要アクションを2〜3点ずつ
+
+■ 最初の90日でやること（即実行ベスト3）
+優先順に理由とともに記載`
+  },
+  {
+    num: 4,
+    name: '顧客管理・ファネル設計',
+    desc: '認知→購入→リピート→口コミの流れを設計する',
+    hint: 'ダブルファネル（パーチェス＋インフルエンス）を使い、<strong>各購買段階で何をすべきか</strong>を会社ごとにカスタマイズします。',
+    promptLabel: '特に弱いと感じるフェーズ（任意）',
+    promptPlaceholder: '例：認知が少ない、リピートが少ない、口コミが生まれないなど',
+    buildPrompt: (c, extra) => `中小企業マーケティング支援の専門家として、以下の会社のマーケティングファネルを設計してください。
+
+【会社情報】
+${c.name} / ${c.industry} / 規模：${c.size}
+事業：${c.biz} / 顧客：${c.customers} / 課題：${c.challenge}
+${extra ? `特に弱いフェーズ：${extra}` : ''}
+
+【出力形式】
+■ パーチェスファネル（認知〜購入）
+各段階（認知→興味→検索・比較→購入）で：
+・使うべきメディア / 発信内容 / 期待するリアクション
+
+■ インフルエンスファネル（購入後〜拡散）
+各段階（購入後満足→リピート→口コミ・紹介）で具体的な施策
+
+■ 最優先で強化すべきフェーズと理由
+
+■ KPI候補（3〜5個）`
+  },
+  {
+    num: 5,
+    name: 'AIプロンプト生成｜自社用テンプレ',
+    desc: '今後の計画・発信・商談に使えるプロンプトをまとめて作成',
+    hint: 'この会社が<strong>日常的に使えるAIプロンプトセット</strong>を生成します。計画の検証・SNS発信・商談準備などにすぐ活用できます。',
+    promptLabel: '特に自動化・効率化したい業務（任意）',
+    promptPlaceholder: '例：SNS投稿、問合せ対応、提案資料作りなど',
+    buildPrompt: (c, extra) => `中小企業のAI活用支援専門家として、以下の会社が日常業務で使えるAIプロンプトテンプレートを5〜7個作成してください。
+
+【会社情報】
+${c.name} / ${c.industry} / 規模：${c.size}
+事業：${c.biz} / 顧客：${c.customers} / 課題：${c.challenge}
+${extra ? `特に自動化したい業務：${extra}` : ''}
+
+各プロンプトの形式：
+タイトル：（用途・場面）
+プロンプト：すぐコピーして使える具体的な文章
+
+対象業務例：マーケ計画の月次振り返り、SNS投稿文作成、顧客への提案補足文、新規顧客向けセールストーク整理、${extra || '業務効率化全般'}`
+  }
+];
+
+let currentStep = 0;
+let results = {};
+let loading = false;
+let companyOpen = false;
+
+function getCompanyInfo() {
+  return {
+    name: document.getElementById('companyName').value || '（会社名未入力）',
+    industry: document.getElementById('industry').value || '（業種未入力）',
+    location: document.getElementById('location').value || '',
+    size: document.getElementById('size').value || '',
+    biz: document.getElementById('bizDetail').value || '（事業内容未入力）',
+    customers: document.getElementById('customers').value || '',
+    challenge: document.getElementById('challenge').value || ''
+  };
+}
+
+function updateTag() {
+  const name = document.getElementById('companyName').value;
+  const tag = document.getElementById('companyTag');
+  tag.textContent = name || '未入力';
+  tag.style.background = name ? '#E1F5EE' : '#eee';
+  tag.style.color = name ? '#0F6E56' : '#888';
+}
+
+function toggleCompany() {
+  companyOpen = !companyOpen;
+  document.getElementById('companyFields').style.display = companyOpen ? 'grid' : 'none';
+  document.getElementById('toggleArrow').textContent = companyOpen ? '▲ 閉じる' : '▼ 開く';
+}
+
+function renderStepNav() {
+  const nav = document.getElementById('stepNav');
+  nav.innerHTML = STEPS.map((s, i) => {
+    let cls = 'step-btn';
+    if (i === currentStep) cls += ' active';
+    else if (results[i]) cls += ' done';
+    return `<button class="${cls}" onclick="goStep(${i})">Step ${s.num}</button>`;
+  }).join('');
+}
+
+function renderStep() {
+  const s = STEPS[currentStep];
+  const res = results[currentStep];
+  document.getElementById('stepContent').innerHTML = `
+    <div class="step-card">
+      <div class="step-card-head">
+        <div class="step-num">${s.num}</div>
+        <div>
+          <div class="step-name">${s.name}</div>
+          <div class="step-desc">${s.desc}</div>
+        </div>
+      </div>
+      <div class="step-body">
+        <div class="prompt-hint">${s.hint}</div>
+        <div class="free-q">
+          <div class="field-label">${s.promptLabel}</div>
+          <input id="extraInput" placeholder="${s.promptPlaceholder}" style="margin-top:4px;">
+        </div>
+        <button class="gen-btn" id="genBtn" onclick="generate()">
+          ✦ AIでこのステップを生成する
+        </button>
+        <div id="loadingWrap" style="display:none;" class="loading-wrap">
+          <div class="loading-bar"></div>
+          <div class="loading-text">AIが生成中です...</div>
+        </div>
+        ${res ? `
+          <div class="divider"></div>
+          <div class="result-label">▼ 生成結果</div>
+          <div class="result-box">${res}</div>
+          <button class="copy-btn" onclick="copyResult()">コピー</button>
+        ` : ''}
+        <div class="nav-row">
+          ${currentStep > 0 ? `<button class="nav-arrow" onclick="goStep(${currentStep - 1})">← 前へ</button>` : '<span></span>'}
+          ${currentStep < STEPS.length - 1
+            ? `<button class="nav-arrow" onclick="goStep(${currentStep + 1})">次へ →</button>`
+            : `<span class="complete-msg">✓ 全ステップ完了</span>`}
+        </div>
+      </div>
+    </div>`;
+}
+
+function goStep(i) {
+  currentStep = i;
+  renderStepNav();
+  renderStep();
+}
+
+async function generate() {
+  if (loading) return;
+  if (API_KEY === 'YOUR_API_KEY') {
+    document.getElementById('apiNotice').style.display = 'block';
+    return;
+  }
+  loading = true;
+  const btn = document.getElementById('genBtn');
+  const lw = document.getElementById('loadingWrap');
+  btn.disabled = true;
+  lw.style.display = 'block';
+
+  const c = getCompanyInfo();
+  const extra = document.getElementById('extraInput')?.value || '';
+  const prompt = STEPS[currentStep].buildPrompt(c, extra);
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY, 'anthropic-version': '2023-06-01' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1200,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+    const data = await resp.json();
+    results[currentStep] = data.content?.map(b => b.text || '').join('') || 'エラーが発生しました';
+  } catch (e) {
+    results[currentStep] = '生成に失敗しました。ネットワーク接続を確認してください。';
+  }
+
+  loading = false;
+  renderStepNav();
+  renderStep();
+}
+
+function copyResult() {
+  const text = results[currentStep] || '';
+  navigator.clipboard.writeText(text).then(() => {
+    const btn = document.querySelector('.copy-btn');
+    if (btn) { btn.textContent = 'コピーしました ✓'; setTimeout(() => btn.textContent = 'コピー', 2000); }
+  });
+}
+
+renderStepNav();
+renderStep();
+</script>
+</body>
+</html>
