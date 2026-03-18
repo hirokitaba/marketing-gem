@@ -54,7 +54,6 @@ textarea { min-height: 70px; line-height: 1.6; }
 .nav-arrow { font-size: 12px; color: #666; background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 7px 14px; cursor: pointer; font-family: inherit; transition: all 0.15s; }
 .nav-arrow:hover { border-color: #1D9E75; color: #0F6E56; }
 .complete-msg { font-size: 13px; color: #0F6E56; font-weight: 500; }
-.api-notice { background: #FAEEDA; border: 1px solid #EF9F27; border-radius: 8px; padding: 10px 14px; font-size: 12px; color: #633806; margin-bottom: 14px; line-height: 1.7; display: none; }
 @media (max-width: 540px) {
   .company-fields { grid-template-columns: 1fr; }
   .company-fields-full { grid-column: 1; }
@@ -75,9 +74,6 @@ textarea { min-height: 70px; line-height: 1.6; }
 
 <div class="container">
 
-  <div class="api-notice" id="apiNotice" style="display:none;"></div>
-
-  <!-- APIキー設定 -->
   <div class="company-panel" style="border-color:#c9edd8;background:#f5fdf9;margin-bottom:1rem;">
     <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
       <span style="font-size:13px;font-weight:500;white-space:nowrap;">🔑 APIキー設定</span>
@@ -87,7 +83,6 @@ textarea { min-height: 70px; line-height: 1.6; }
     <div style="font-size:11px;color:#888;margin-top:6px;">入力した内容はこのブラウザにのみ保存されます。他の人には見えません。</div>
   </div>
 
-  <!-- 会社情報 -->
   <div class="company-panel" id="companyPanel">
     <div class="company-panel-header" onclick="toggleCompany()">
       <div style="display:flex;align-items:center;">
@@ -134,18 +129,14 @@ textarea { min-height: 70px; line-height: 1.6; }
     </div>
   </div>
 
-  <!-- ステップナビ -->
   <div class="step-nav" id="stepNav"></div>
-
-  <!-- ステップコンテンツ -->
   <div id="stepContent"></div>
 
 </div>
 
 <script>
 function getApiKey() {
-  const k = localStorage.getItem('anthropic_api_key') || '';
-  return k;
+  return localStorage.getItem('anthropic_api_key') || '';
 }
 
 const STEPS = [
@@ -156,131 +147,43 @@ const STEPS = [
     hint: '入力した会社情報をもとに、<strong>3C分析の骨格</strong>を生成します。自社の強み・弱み、想定顧客像、競合との差異を整理します。',
     promptLabel: '特に掘り下げたい点があれば（任意）',
     promptPlaceholder: '例：競合と差別化できている点を強調してほしい',
-    buildPrompt: (c, extra) => `あなたは中小企業のマーケティング支援の専門家です。以下の会社情報をもとに、マーケティング研究会のワークシートとして使える3C分析を日本語で作成してください。
-
-【会社情報】
-会社名：${c.name} / 業種：${c.industry} / 所在地：${c.location} / 規模：${c.size}
-事業内容：${c.biz}
-主な顧客：${c.customers}
-現在の課題：${c.challenge}
-${extra ? `追加の視点：${extra}` : ''}
-
-【出力形式】
-■ 自社（Company）
-・強み（3〜4点）
-・弱み・課題（2〜3点）
-
-■ 顧客（Customer）
-・主要ターゲット層のプロフィール
-・顧客が求めていること（ニーズ・インサイト）
-
-■ 競合（Competitor）
-・想定される競合の特徴
-・自社が勝てるポイント・差別化余地
-
-最後に「この3Cから見えるマーケ上の重要課題」を1〜2行で述べてください。`
+    buildPrompt: (c, extra) => `あなたは中小企業のマーケティング支援の専門家です。以下の会社情報をもとに3C分析を日本語で作成してください。\n\n会社名：${c.name} / 業種：${c.industry} / 所在地：${c.location} / 規模：${c.size}\n事業内容：${c.biz}\n主な顧客：${c.customers}\n現在の課題：${c.challenge}\n${extra ? `追加の視点：${extra}` : ''}\n\n■ 自社（Company）\n・強み（3〜4点）\n・弱み・課題（2〜3点）\n\n■ 顧客（Customer）\n・主要ターゲット層のプロフィール\n・顧客が求めていること\n\n■ 競合（Competitor）\n・想定される競合の特徴\n・自社が勝てるポイント\n\n最後に「この3Cから見えるマーケ上の重要課題」を1〜2行で述べてください。`
   },
   {
     num: 2,
     name: 'マーケ基本戦略｜4P×リソース確認',
     desc: '商品・価格・流通・プロモーションと自社リソースを対応させる',
-    hint: '自社の「人・モノ・カネ・情報」リソースに応じた<strong>現実的な4P戦略案</strong>を生成します。無理なく実行できる打ち手を優先します。',
+    hint: '自社の「人・モノ・カネ・情報」リソースに応じた<strong>現実的な4P戦略案</strong>を生成します。',
     promptLabel: '特に強化したい領域（任意）',
     promptPlaceholder: '例：プロモーション、価格戦略、チャネル拡大など',
-    buildPrompt: (c, extra) => `中小企業のマーケティング実践支援の専門家として、以下の会社情報をもとに4P戦略の整理と、リソース（人・モノ・カネ・情報）との対応表を日本語で作成してください。
-
-【会社情報】
-${c.name} / ${c.industry} / ${c.location} / 規模：${c.size}
-事業：${c.biz} / 顧客：${c.customers} / 課題：${c.challenge}
-${extra ? `強化したい領域：${extra}` : ''}
-
-【出力形式】
-■ Product（商品・サービス）
-・現状の強みと改善余地
-
-■ Price（価格戦略）
-・推奨価格ポジションと根拠
-
-■ Place（流通・チャネル）
-・現状チャネルと追加すべきチャネル候補
-
-■ Promotion（プロモーション）
-・リソースを考慮した優先施策（3点、実行しやすい順）
-
-■ リソース確認
-人・モノ・カネ・情報それぞれに「使えるもの」「不足しているもの」を簡潔に記載`
+    buildPrompt: (c, extra) => `中小企業のマーケティング支援専門家として、以下の会社の4P戦略とリソース対応表を日本語で作成してください。\n\n${c.name} / ${c.industry} / ${c.location} / 規模：${c.size}\n事業：${c.biz} / 顧客：${c.customers} / 課題：${c.challenge}\n${extra ? `強化したい領域：${extra}` : ''}\n\n■ Product（商品・サービス）\n■ Price（価格戦略）\n■ Place（流通・チャネル）\n■ Promotion（優先施策3点）\n■ リソース確認（人・モノ・カネ・情報）`
   },
   {
     num: 3,
     name: 'ビジョン逆算｜中長期マーケ計画',
     desc: '3〜5年後のゴールから今年やるべきことを逆算する',
-    hint: 'ビジョン・目標から逆算した<strong>年間マーケティング計画の骨格</strong>を生成します。「何を、いつ、誰に」を時系列で整理します。',
+    hint: 'ビジョン・目標から逆算した<strong>年間マーケティング計画の骨格</strong>を生成します。',
     promptLabel: '3〜5年後に実現したい姿（できれば入力）',
     promptPlaceholder: '例：地域No.1になる、法人顧客を20社確保するなど',
-    buildPrompt: (c, extra) => `中小企業の経営支援専門家として、以下の会社情報とビジョンをもとに、マーケティング年間計画の骨格を作成してください。
-
-【会社情報】
-${c.name} / ${c.industry} / ${c.location} / 規模：${c.size}
-事業：${c.biz} / 顧客：${c.customers} / 課題：${c.challenge}
-${extra ? `目指す姿：${extra}` : ''}
-
-【出力形式】
-■ 中長期目標（3〜5年）
-目標と主要KPI（売上・顧客数・認知度など）
-
-■ 今年度の重点テーマ（3つ以内）
-
-■ 年間アクションプラン（月次イメージ）
-Q1・Q2・Q3・Q4 それぞれの主要アクションを2〜3点ずつ
-
-■ 最初の90日でやること（即実行ベスト3）
-優先順に理由とともに記載`
+    buildPrompt: (c, extra) => `中小企業の経営支援専門家として、以下の会社のマーケティング年間計画の骨格を作成してください。\n\n${c.name} / ${c.industry} / 規模：${c.size}\n事業：${c.biz} / 顧客：${c.customers} / 課題：${c.challenge}\n${extra ? `目指す姿：${extra}` : ''}\n\n■ 中長期目標（3〜5年）と主要KPI\n■ 今年度の重点テーマ（3つ以内）\n■ 年間アクションプラン（Q1〜Q4）\n■ 最初の90日でやること（ベスト3）`
   },
   {
     num: 4,
     name: '顧客管理・ファネル設計',
     desc: '認知→購入→リピート→口コミの流れを設計する',
-    hint: 'ダブルファネル（パーチェス＋インフルエンス）を使い、<strong>各購買段階で何をすべきか</strong>を会社ごとにカスタマイズします。',
+    hint: 'ダブルファネルを使い、<strong>各購買段階で何をすべきか</strong>を会社ごとにカスタマイズします。',
     promptLabel: '特に弱いと感じるフェーズ（任意）',
     promptPlaceholder: '例：認知が少ない、リピートが少ない、口コミが生まれないなど',
-    buildPrompt: (c, extra) => `中小企業マーケティング支援の専門家として、以下の会社のマーケティングファネルを設計してください。
-
-【会社情報】
-${c.name} / ${c.industry} / 規模：${c.size}
-事業：${c.biz} / 顧客：${c.customers} / 課題：${c.challenge}
-${extra ? `特に弱いフェーズ：${extra}` : ''}
-
-【出力形式】
-■ パーチェスファネル（認知〜購入）
-各段階（認知→興味→検索・比較→購入）で：
-・使うべきメディア / 発信内容 / 期待するリアクション
-
-■ インフルエンスファネル（購入後〜拡散）
-各段階（購入後満足→リピート→口コミ・紹介）で具体的な施策
-
-■ 最優先で強化すべきフェーズと理由
-
-■ KPI候補（3〜5個）`
+    buildPrompt: (c, extra) => `中小企業マーケティング支援の専門家として、以下の会社のマーケティングファネルを設計してください。\n\n${c.name} / ${c.industry} / 規模：${c.size}\n事業：${c.biz} / 顧客：${c.customers} / 課題：${c.challenge}\n${extra ? `特に弱いフェーズ：${extra}` : ''}\n\n■ パーチェスファネル（認知→興味→検索・比較→購入）\n各段階でメディア・発信内容・期待するリアクションを記載\n\n■ インフルエンスファネル（購入後満足→リピート→口コミ）\n各段階で具体的な施策を記載\n\n■ 最優先で強化すべきフェーズと理由\n■ KPI候補（3〜5個）`
   },
   {
     num: 5,
     name: 'AIプロンプト生成｜自社用テンプレ',
     desc: '今後の計画・発信・商談に使えるプロンプトをまとめて作成',
-    hint: 'この会社が<strong>日常的に使えるAIプロンプトセット</strong>を生成します。計画の検証・SNS発信・商談準備などにすぐ活用できます。',
+    hint: 'この会社が<strong>日常的に使えるAIプロンプトセット</strong>を生成します。',
     promptLabel: '特に自動化・効率化したい業務（任意）',
     promptPlaceholder: '例：SNS投稿、問合せ対応、提案資料作りなど',
-    buildPrompt: (c, extra) => `中小企業のAI活用支援専門家として、以下の会社が日常業務で使えるAIプロンプトテンプレートを5〜7個作成してください。
-
-【会社情報】
-${c.name} / ${c.industry} / 規模：${c.size}
-事業：${c.biz} / 顧客：${c.customers} / 課題：${c.challenge}
-${extra ? `特に自動化したい業務：${extra}` : ''}
-
-各プロンプトの形式：
-タイトル：（用途・場面）
-プロンプト：すぐコピーして使える具体的な文章
-
-対象業務例：マーケ計画の月次振り返り、SNS投稿文作成、顧客への提案補足文、新規顧客向けセールストーク整理、${extra || '業務効率化全般'}`
+    buildPrompt: (c, extra) => `中小企業のAI活用支援専門家として、以下の会社が日常業務で使えるAIプロンプトを5〜7個作成してください。\n\n${c.name} / ${c.industry} / 規模：${c.size}\n事業：${c.biz} / 顧客：${c.customers} / 課題：${c.challenge}\n${extra ? `特に自動化したい業務：${extra}` : ''}\n\n各プロンプトの形式：\nタイトル：（用途・場面）\nプロンプト：すぐコピーして使える具体的な文章`
   }
 ];
 
@@ -292,7 +195,7 @@ let companyOpen = false;
 function getCompanyInfo() {
   return {
     name: document.getElementById('companyName').value || '（会社名未入力）',
-    industry: document.getElementById('industry').value || '（業種未入力）',
+    industry: document.getElementById('industry').value || '',
     location: document.getElementById('location').value || '',
     size: document.getElementById('size').value || '',
     biz: document.getElementById('bizDetail').value || '（事業内容未入力）',
@@ -343,24 +246,15 @@ function renderStep() {
           <div class="field-label">${s.promptLabel}</div>
           <input id="extraInput" placeholder="${s.promptPlaceholder}" style="margin-top:4px;">
         </div>
-        <button class="gen-btn" id="genBtn" onclick="generate()">
-          ✦ AIでこのステップを生成する
-        </button>
+        <button class="gen-btn" id="genBtn" onclick="generate()">✦ AIでこのステップを生成する</button>
         <div id="loadingWrap" style="display:none;" class="loading-wrap">
           <div class="loading-bar"></div>
           <div class="loading-text">AIが生成中です...</div>
         </div>
-        ${res ? `
-          <div class="divider"></div>
-          <div class="result-label">▼ 生成結果</div>
-          <div class="result-box">${res}</div>
-          <button class="copy-btn" onclick="copyResult()">コピー</button>
-        ` : ''}
+        ${res ? `<div class="divider"></div><div class="result-label">▼ 生成結果</div><div class="result-box">${res}</div><button class="copy-btn" onclick="copyResult()">コピー</button>` : ''}
         <div class="nav-row">
           ${currentStep > 0 ? `<button class="nav-arrow" onclick="goStep(${currentStep - 1})">← 前へ</button>` : '<span></span>'}
-          ${currentStep < STEPS.length - 1
-            ? `<button class="nav-arrow" onclick="goStep(${currentStep + 1})">次へ →</button>`
-            : `<span class="complete-msg">✓ 全ステップ完了</span>`}
+          ${currentStep < STEPS.length - 1 ? `<button class="nav-arrow" onclick="goStep(${currentStep + 1})">次へ →</button>` : `<span class="complete-msg">✓ 全ステップ完了</span>`}
         </div>
       </div>
     </div>`;
@@ -380,10 +274,8 @@ async function generate() {
     return;
   }
   loading = true;
-  const btn = document.getElementById('genBtn');
-  const lw = document.getElementById('loadingWrap');
-  btn.disabled = true;
-  lw.style.display = 'block';
+  document.getElementById('genBtn').disabled = true;
+  document.getElementById('loadingWrap').style.display = 'block';
 
   const c = getCompanyInfo();
   const extra = document.getElementById('extraInput')?.value || '';
@@ -392,7 +284,12 @@ async function generate() {
   try {
     const resp = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'x-api-key': API_KEY, 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-access': 'true' },
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1200,
@@ -400,9 +297,13 @@ async function generate() {
       })
     });
     const data = await resp.json();
-    results[currentStep] = data.content?.map(b => b.text || '').join('') || 'エラーが発生しました';
+    if (data.error) {
+      results[currentStep] = 'エラー：' + data.error.message;
+    } else {
+      results[currentStep] = data.content?.map(b => b.text || '').join('') || 'エラーが発生しました';
+    }
   } catch (e) {
-    results[currentStep] = '生成に失敗しました。ネットワーク接続を確認してください。';
+    results[currentStep] = 'エラー：' + e.message;
   }
 
   loading = false;
